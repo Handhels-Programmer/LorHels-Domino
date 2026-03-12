@@ -1,910 +1,513 @@
 <!DOCTYPE html>
-<html lang="do">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BarBarazo Domino</title>
-    
-    <!-- Tailwind CSS -->
+    <title>LorHels Domino - Gestión de Mesas</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Iconos Lucide -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-
-    <!-- Fuente Google -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Russo+One&display=swap" rel="stylesheet">
-
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        h1, .brand-font { font-family: 'Russo One', sans-serif; letter-spacing: 0.05em; }
-        
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Scrollbar personalizado - Tono Ámbar */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #1c1917; }
-        ::-webkit-scrollbar-thumb { background: #78350f; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #b45309; }
-        
-        /* Ocultar flechas de input number */
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f1f5f9;
+        }
+        .font-gaming {
+            font-family: 'Rajdhani', sans-serif;
+        }
+        .card-glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        .blue-glow {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+        }
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+        }
+        input:focus {
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
         }
     </style>
 </head>
-<body class="bg-stone-950 text-stone-100 min-h-screen pb-20 selection:bg-amber-500 selection:text-black flex flex-col">
-
-    <!-- NAVBAR -->
-    <header class="bg-stone-900 border-b border-amber-900/30 sticky top-0 z-30 shadow-lg shadow-black/50">
-        <div class="max-w-7xl mx-auto px-4 h-20 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <!-- LOGO CONTAINER -->
-                <div class="relative group">
-                    <div class="absolute -inset-1 bg-gradient-to-r from-amber-600 to-orange-600 rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
-                    <div class="relative bg-stone-900 p-1 rounded-lg border border-amber-800">
-                        <img src="Logo.png" alt="Logo" class="h-12 w-12 rounded object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                        <i data-lucide="beer" class="text-amber-500 w-10 h-10 hidden"></i>
+<body class="min-h-screen">
+    <div id="app" class="flex flex-col min-h-screen">
+        <!-- Navbar -->
+        <nav class="bg-slate-900 border-b border-blue-500/30 p-4 sticky top-0 z-50">
+            <div class="container mx-auto flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <div class="bg-blue-600 p-2 rounded-lg shadow-lg blue-glow">
+                        <i data-lucide="dice-5" class="text-white"></i>
                     </div>
+                    <h1 class="text-2xl font-bold font-gaming tracking-wider text-blue-400">LORHELS DOMINO</h1>
                 </div>
                 
-                <div class="flex flex-col">
-                    <h1 class="text-2xl font-bold hidden sm:block text-white uppercase" style="text-shadow: 2px 2px 0px #78350f;">
-                        BarBarazo
-                    </h1>
-                    <span class="text-xs text-amber-500 font-medium tracking-widest hidden sm:block">@Bar.Barazo</span>
+                <div class="flex items-center gap-4">
+                    <div id="connection-status" class="flex items-center gap-2 text-xs uppercase tracking-widest text-slate-400">
+                        <span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span>
+                        Conectando...
+                    </div>
+                    <button id="btn-users-mgmt" class="p-2 hover:bg-slate-800 rounded-full transition-colors text-blue-300 hidden" title="Usuarios Admins">
+                        <i data-lucide="users"></i>
+                    </button>
+                    <button id="btn-history" class="p-2 hover:bg-slate-800 rounded-full transition-colors text-blue-300 hidden" title="Historial">
+                        <i data-lucide="history"></i>
+                    </button>
+                    <button id="btn-auth" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center gap-2">
+                        <i data-lucide="log-in" class="w-4 h-4"></i>
+                        ADMIN
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <main class="container mx-auto p-4 flex-grow">
+            <!-- Dashboard Stats -->
+            <div id="dashboard" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 hidden">
+                <div class="card-glass p-4 rounded-xl border-l-4 border-emerald-500">
+                    <p class="text-slate-400 text-xs uppercase font-bold">Caja del Día</p>
+                    <p id="stat-caja" class="text-2xl font-bold font-gaming text-emerald-400">$0.00</p>
+                </div>
+                <div class="card-glass p-4 rounded-xl border-l-4 border-amber-500">
+                    <p class="text-slate-400 text-xs uppercase font-bold">Dinero Pendiente</p>
+                    <p id="stat-pendientes" class="text-2xl font-bold font-gaming text-amber-400">$0.00</p>
+                </div>
+                <div class="card-glass p-4 rounded-xl border-l-4 border-blue-500">
+                    <p class="text-slate-400 text-xs uppercase font-bold">Mesas Activas</p>
+                    <p id="stat-mesas" class="text-2xl font-bold font-gaming text-blue-400">0</p>
+                </div>
+                <div class="card-glass p-4 rounded-xl border-l-4 border-rose-500">
+                    <p class="text-slate-400 text-xs uppercase font-bold">Top Perdedor</p>
+                    <p id="stat-loser" class="text-2xl font-bold font-gaming text-rose-400">-</p>
                 </div>
             </div>
 
-            <div class="flex items-center gap-4">
-                <!-- Estado Conexión -->
-                <div class="flex items-center gap-2 bg-stone-950/50 px-3 py-1.5 rounded-full border border-stone-800">
-                    <div id="connection-status" class="h-2.5 w-2.5 rounded-full bg-red-600 shadow-[0_0_10px_rgba(220,38,38,0.5)] transition-colors duration-500"></div>
-                    <span id="connection-text" class="text-[10px] uppercase font-bold text-stone-500 tracking-wider">Desconectado</span>
-                </div>
+            <!-- Acciones -->
+            <div id="admin-actions" class="mb-6 flex justify-between items-center hidden">
+                <h2 class="text-xl font-bold flex items-center gap-2 text-blue-400 font-gaming uppercase tracking-widest">
+                    <i data-lucide="layout-grid"></i>
+                    Mesas en Juego
+                </h2>
+                <button id="btn-new-table" class="bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 border border-blue-500/50 px-6 py-2 rounded-xl transition-all flex items-center gap-2 font-bold">
+                    <i data-lucide="plus-circle"></i>
+                    NUEVA MESA
+                </button>
+            </div>
 
-                <!-- Controles de Usuario -->
-                <div id="admin-controls" class="hidden flex items-center gap-2 bg-stone-800 rounded-lg p-1 border border-amber-500/30 shadow-inner">
-                    <span id="admin-badge" class="px-3 py-1 bg-amber-600 text-stone-900 rounded text-xs font-bold shadow brand-font uppercase">ADMIN</span>
-                    <button onclick="window.app.logoutAdmin()" class="p-1 text-stone-400 hover:text-red-400 transition-colors" title="Salir">
-                        <i data-lucide="log-out" class="w-4 h-4"></i>
+            <!-- Grid de Mesas -->
+            <div id="tables-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="col-span-full text-center py-20 text-slate-500 italic">
+                    <i data-lucide="lock" class="mx-auto mb-4 w-12 h-12 opacity-20"></i>
+                    Inicia sesión como administrador para gestionar las mesas.
+                </div>
+            </div>
+        </main>
+
+        <footer class="p-6 text-center text-slate-500 text-sm border-t border-slate-800 mt-auto">
+            LorHels Domino &copy; 2025 - Sistema de Gestión de Torneos
+        </footer>
+    </div>
+
+    <!-- Modal Login -->
+    <div id="modal-login" class="fixed inset-0 modal-overlay z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-blue-500/30 p-8 rounded-2xl w-full max-w-md shadow-2xl">
+            <h2 class="text-2xl font-bold font-gaming mb-6 text-center text-blue-400 tracking-widest uppercase">Acceso Administrador</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs uppercase text-slate-400 mb-1">Correo Electrónico</label>
+                    <input type="email" id="login-email" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500" placeholder="admin@lorhels.com">
+                </div>
+                <div>
+                    <label class="block text-xs uppercase text-slate-400 mb-1">Contraseña</label>
+                    <input type="password" id="login-password" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500" placeholder="••••••••">
+                </div>
+                <button id="btn-do-login" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-lg font-bold text-lg mt-4 transition-all shadow-lg">INGRESAR</button>
+                <button onclick="closeModal('modal-login')" class="w-full text-slate-500 text-sm hover:text-white mt-2">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Gestión de Usuarios Admins -->
+    <div id="modal-users" class="fixed inset-0 modal-overlay z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-blue-500/30 p-8 rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold font-gaming text-blue-400 uppercase tracking-widest">Gestión de Administradores</h2>
+                <button onclick="closeModal('modal-users')" class="text-slate-400 hover:text-white"><i data-lucide="x"></i></button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 overflow-y-auto pr-2">
+                <!-- Formulario Nuevo Admin -->
+                <div class="space-y-4">
+                    <h3 class="text-sm font-bold text-slate-300 uppercase border-b border-slate-700 pb-2">Registrar Nuevo</h3>
+                    <div>
+                        <label class="block text-[10px] uppercase text-slate-500 mb-1">Email</label>
+                        <input type="email" id="reg-email" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] uppercase text-slate-500 mb-1">Contraseña Nueva</label>
+                        <input type="password" id="reg-password" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    <button id="btn-do-register" class="w-full bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/50 py-2 rounded-lg font-bold transition-all text-sm">
+                        CREAR ADMINISTRADOR
                     </button>
                 </div>
 
-                <button id="btn-login" onclick="window.app.showLoginModal()" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-stone-800 hover:bg-stone-700 border border-stone-700 text-amber-500/80 hover:text-amber-400 text-sm font-medium transition-all hover:border-amber-500/50">
-                    <i data-lucide="lock" class="w-4 h-4"></i>
-                    <span class="hidden xs:inline">Admin</span>
-                </button>
-
-                <button onclick="window.app.toggleHistory()" class="p-2 rounded-lg text-stone-400 hover:text-amber-400 hover:bg-stone-800 transition-colors border border-transparent hover:border-stone-700" id="btn-history">
-                    <i data-lucide="history" class="w-6 h-6"></i>
-                </button>
+                <!-- Lista de Admins -->
+                <div class="space-y-4">
+                    <h3 class="text-sm font-bold text-slate-300 uppercase border-b border-slate-700 pb-2">Admins Actuales</h3>
+                    <div id="admins-list" class="space-y-2">
+                        <!-- Items -->
+                        <div class="text-xs text-slate-500 italic">Cargando lista...</div>
+                    </div>
+                </div>
             </div>
         </div>
-    </header>
+    </div>
 
-    <main class="max-w-7xl mx-auto p-4 pt-8 w-full flex-grow">
-        
-        <!-- DASHBOARD (Solo Admin) -->
-        <div id="dashboard-stats" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 fade-in">
-            <!-- Inyectado por JS -->
-        </div>
-
-        <!-- BARRA DE ACCIÓN (Crear Mesa - Solo Admin) -->
-        <div id="action-bar" class="hidden mb-8 flex gap-3 fade-in bg-stone-900 p-4 rounded-xl border border-stone-800 shadow-xl">
-            <input type="text" id="new-table-name" placeholder="Nombre de la nueva mesa..." 
-                class="bg-stone-950 border-stone-700 border rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none w-full placeholder-stone-600">
-            <button onclick="window.app.addTable()" class="bg-amber-600 hover:bg-amber-500 text-stone-950 border border-amber-500 px-6 py-2 rounded-lg flex items-center gap-2 transition-all font-bold shadow-[0_4px_0_rgb(120,53,15)] active:shadow-none active:translate-y-[4px] whitespace-nowrap">
-                <i data-lucide="plus" class="w-5 h-5"></i> <span class="hidden sm:inline">Nueva Mesa</span>
-            </button>
-        </div>
-
-        <!-- VISTA HISTORIAL -->
-        <div id="history-view" class="hidden bg-stone-900 rounded-xl border border-amber-900/30 overflow-hidden mb-8 shadow-2xl fade-in">
-            <div class="p-4 border-b border-stone-800 flex justify-between items-center bg-stone-950/50">
-                <h2 class="font-bold text-lg flex items-center gap-2 text-amber-500 brand-font">
-                    <i data-lucide="scroll" class="w-5 h-5"></i> Historial de Partidas
-                </h2>
-                <button onclick="window.app.toggleHistory()" class="text-stone-500 hover:text-white transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
+    <!-- Modal Nueva Mesa -->
+    <div id="modal-table" class="fixed inset-0 modal-overlay z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-blue-500/30 p-8 rounded-2xl w-full max-w-md">
+            <h2 class="text-2xl font-bold font-gaming mb-6 flex items-center gap-2">
+                <i data-lucide="plus-square" class="text-blue-500"></i> CREAR MESA
+            </h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs uppercase text-slate-400 mb-1">Nombre o Número de Mesa</label>
+                    <input type="text" id="new-table-name" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500" placeholder="Ej: Mesa 1">
+                </div>
+                <button id="btn-save-table" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-lg font-bold transition-all shadow-lg">CREAR AHORA</button>
+                <button onclick="closeModal('modal-table')" class="w-full text-slate-500 text-sm hover:text-white mt-2">Cancelar</button>
             </div>
-            <div class="overflow-x-auto max-h-[60vh]">
-                <table class="w-full text-left text-sm text-stone-400">
-                    <thead class="bg-stone-950 text-stone-300 uppercase font-medium sticky top-0 border-b border-stone-800">
-                        <tr id="history-header">
-                            <!-- Inyectado por JS según Rol -->
+        </div>
+    </div>
+
+    <!-- Modal Acción Jugador (Deuda/Pago) -->
+    <div id="modal-player-action" class="fixed inset-0 modal-overlay z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-blue-500/30 p-8 rounded-2xl w-full max-w-sm">
+            <h2 id="player-action-title" class="text-2xl font-bold font-gaming mb-2 text-blue-400 uppercase tracking-widest">REGISTRAR</h2>
+            <p id="player-action-subtitle" class="text-slate-400 mb-6 italic text-sm">Cargando...</p>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs uppercase text-slate-400 mb-1">Monto ($)</label>
+                    <input type="number" id="action-amount" class="w-full text-center text-4xl font-bold bg-slate-800 border border-slate-700 rounded-xl p-4 text-white focus:outline-none focus:border-blue-500 font-gaming" placeholder="0.00">
+                </div>
+                <button id="btn-confirm-action" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold text-lg transition-all shadow-xl">CONFIRMAR</button>
+                <button onclick="closeModal('modal-player-action')" class="w-full text-slate-500 text-sm hover:text-white mt-2">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Historial -->
+    <div id="modal-history" class="fixed inset-0 modal-overlay z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-blue-500/30 p-6 rounded-2xl w-full max-w-4xl max-h-[85vh] flex flex-col">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold font-gaming text-blue-400 uppercase tracking-widest">Historial de Partidas</h2>
+                <button onclick="closeModal('modal-history')" class="text-slate-400 hover:text-white"><i data-lucide="x"></i></button>
+            </div>
+            <div class="overflow-y-auto flex-grow rounded-lg border border-slate-800">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-800 text-[10px] uppercase text-slate-400 sticky top-0">
+                        <tr>
+                            <th class="p-4">Fecha/Hora</th>
+                            <th class="p-4">Mesa</th>
+                            <th class="p-4">Cerrado por</th>
+                            <th class="p-4">Jugadores</th>
+                            <th class="p-4 text-right">Total Caja</th>
                         </tr>
                     </thead>
                     <tbody id="history-list">
-                        <!-- Inyectado por JS -->
+                        <!-- Items -->
                     </tbody>
                 </table>
             </div>
         </div>
+    </div>
 
-        <!-- GRID DE MESAS -->
-        <div id="tables-grid" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3 fade-in pb-10">
-            <!-- Mesas inyectadas por JS -->
-        </div>
-
-        <div id="empty-state" class="hidden col-span-full py-20 text-center text-stone-600 border-2 border-dashed border-stone-800 rounded-xl mt-8 bg-stone-900/30">
-            <div class="bg-stone-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i data-lucide="layout-grid" class="opacity-20 w-10 h-10 text-stone-400"></i>
-            </div>
-            <p class="text-xl font-medium text-stone-500">No hay mesas activas</p>
-            <p class="text-sm mt-2 text-stone-600">¡Abre una mesa para comenzar el juego!</p>
-        </div>
-
-    </main>
-
-    <!-- FOOTER REDES SOCIALES -->
-    <footer class="bg-stone-900 border-t border-amber-900/30 py-8 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
-            <div>
-                <h4 class="text-white font-bold brand-font text-lg tracking-wider">BarBarazo</h4>
-                <p class="text-stone-500 text-sm mt-1">El mejor ambiente para votar el estrés.</p>
-            </div>
-            
-            <div class="flex gap-4">
-                <a href="https://instagram.com/Bar.Barazo" target="_blank" class="p-3 bg-stone-800 rounded-full text-stone-400 hover:text-pink-500 hover:bg-stone-700 transition-all border border-stone-700 hover:border-pink-500/30 group" title="Instagram">
-                    <i data-lucide="instagram" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
-                </a>
-                <a href="https://www.facebook.com/profile.php?id=61582862584069" target="_blank" class="p-3 bg-stone-800 rounded-full text-stone-400 hover:text-blue-500 hover:bg-stone-700 transition-all border border-stone-700 hover:border-blue-500/30 group" title="Facebook">
-                    <i data-lucide="facebook" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
-                </a>
-                <a href="https://wa.me/18496382233" target="_blank" class="p-3 bg-stone-800 rounded-full text-stone-400 hover:text-green-500 hover:bg-stone-700 transition-all border border-stone-700 hover:border-green-500/30 group" title="WhatsApp">
-                    <i data-lucide="message-circle" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
-                </a>
-            </div>
-
-            <div class="text-stone-600 text-xs">
-                &copy; 2025 ProgrAppWeb.<br>WS: 1 (829) 913-5723<br>Todos los derechos reservados.
-            </div>
-        </div>
-    </footer>
-
-    <!-- MODAL LOGIN ADMIN -->
-    <div id="login-modal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 fade-in">
-        <div class="bg-stone-900 rounded-2xl border border-amber-600/30 shadow-2xl p-8 w-full max-w-sm relative">
-            <button onclick="window.app.closeLoginModal()" class="absolute right-4 top-4 text-stone-500 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
-            
-            <div class="flex items-center justify-center gap-3 mb-6">
-                <div class="bg-amber-500/10 p-3 rounded-full border border-amber-500/20">
-                    <i data-lucide="lock" class="text-amber-500 w-8 h-8"></i>
-                </div>
-            </div>
-            
-            <h3 class="text-2xl font-bold text-center text-white brand-font mb-6">Acceso Admin</h3>
-            
-            <form onsubmit="event.preventDefault(); window.app.loginAdmin();" class="space-y-4">
-                <div>
-                    <label class="block text-xs uppercase tracking-wider text-stone-500 mb-2 font-bold ml-1">Usuario</label>
-                    <input type="text" id="admin-username" autofocus
-                        class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-amber-500 outline-none placeholder-stone-600 text-lg tracking-wide"
-                        placeholder="Nombre de usuario">
-                </div>
-                
-                <div>
-                    <label class="block text-xs uppercase tracking-wider text-stone-500 mb-2 font-bold ml-1">Contraseña</label>
-                    <input type="password" id="admin-password"
-                        class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-amber-500 outline-none placeholder-stone-600 text-lg tracking-widest"
-                        placeholder="••••••••">
-                </div>
-
-                <p id="login-error" class="text-red-500 text-xs mt-2 hidden flex items-center justify-center gap-1 font-medium bg-red-500/10 py-2 rounded">
-                    <i data-lucide="alert-circle" class="w-3 h-3"></i> Usuario o contraseña incorrectos
-                </p>
-
-                <div class="pt-2">
-                    <button type="submit" class="w-full bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold py-3 rounded-lg transition-colors shadow-lg shadow-amber-900/20 uppercase tracking-wide">
-                        Entrar
-                    </button>
-                </div>
-            </form>
+    <!-- Custom Alert -->
+    <div id="custom-alert" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-[200] hidden">
+        <div id="alert-box" class="px-8 py-4 rounded-2xl border shadow-2xl flex items-center gap-3 font-bold animate-bounce">
+            <i id="alert-icon" data-lucide="info"></i>
+            <span id="alert-message">Mensaje</span>
         </div>
     </div>
 
-    <!-- MODAL AGREGAR DEUDA -->
-    <div id="debt-modal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 fade-in">
-        <div class="bg-stone-900 rounded-2xl border border-stone-800 shadow-2xl p-6 w-full max-w-sm relative border-t-4 border-t-red-600">
-            <button onclick="window.app.closeDebtModal()" class="absolute right-4 top-4 text-stone-500 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
-            
-            <div class="flex items-center gap-2 mb-2 text-xl font-bold text-white brand-font">
-                <i data-lucide="trending-up" class="text-red-500"></i> Registrar Pérdida
-            </div>
-            
-            <div class="text-sm text-stone-400 mb-6 font-mono" id="debt-player-name">Jugador</div>
-
-            <form onsubmit="event.preventDefault(); window.app.confirmDebt();" class="space-y-4">
-                <div>
-                    <label class="block text-xs uppercase tracking-wider text-stone-500 mb-2 font-bold">Monto ($)</label>
-                    <div class="relative">
-                        <span class="absolute left-4 top-3 text-stone-500">$</span>
-                        <input type="number" id="debt-amount"
-                            class="w-full bg-stone-950 border border-stone-700 rounded-xl px-4 pl-8 py-4 text-white text-2xl font-mono focus:ring-2 focus:ring-red-500 outline-none placeholder-stone-700"
-                            placeholder="0">
-                    </div>
-                </div>
-                <div class="flex gap-3 pt-4">
-                    <button type="button" onclick="window.app.closeDebtModal()" class="flex-1 bg-stone-800 hover:bg-stone-700 text-white font-bold py-3 rounded-lg transition-colors">
-                        Cancelar
-                    </button>
-                    <button type="submit" class="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-lg transition-colors shadow-[0_4px_0_rgb(153,27,27)] active:shadow-none active:translate-y-[4px]">
-                        Confirmar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL PAGAR DEUDA -->
-    <div id="pay-modal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 fade-in">
-        <div class="bg-stone-900 rounded-2xl border border-stone-800 shadow-2xl p-6 w-full max-w-sm relative border-t-4 border-t-amber-500">
-            <button onclick="window.app.closePayModal()" class="absolute right-4 top-4 text-stone-500 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
-            
-            <div class="flex items-center gap-2 mb-2 text-xl font-bold text-white brand-font">
-                <i data-lucide="coins" class="text-amber-500"></i> Registrar Pago
-            </div>
-            
-            <div class="text-sm text-stone-400 mb-6 font-mono" id="pay-player-name">Jugador</div>
-            
-            <form onsubmit="event.preventDefault(); window.app.confirmPay();" class="space-y-4">
-                <div class="bg-stone-950 p-4 rounded-xl border border-stone-800 mb-4 flex justify-between items-center">
-                    <span class="text-xs text-stone-500 uppercase font-bold">Deuda Actual</span>
-                    <span class="text-red-500 font-mono text-xl font-bold" id="pay-total-debt">$0</span>
-                </div>
-
-                <div>
-                    <label class="block text-xs uppercase tracking-wider text-stone-500 mb-2 font-bold">Monto a Pagar ($)</label>
-                    <div class="relative">
-                        <span class="absolute left-4 top-3 text-stone-500">$</span>
-                        <input type="number" id="pay-amount"
-                            class="w-full bg-stone-950 border border-stone-700 rounded-xl px-4 pl-8 py-4 text-amber-500 text-2xl font-mono focus:ring-2 focus:ring-amber-500 outline-none placeholder-stone-700 font-bold"
-                            placeholder="0">
-                    </div>
-                </div>
-
-                <div class="flex gap-3 pt-4">
-                    <button type="button" onclick="window.app.closePayModal()" class="flex-1 bg-stone-800 hover:bg-stone-700 text-white font-bold py-3 rounded-lg transition-colors">
-                        Cancelar
-                    </button>
-                    <button type="submit" class="flex-1 bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold py-3 rounded-lg transition-colors shadow-[0_4px_0_rgb(180,83,9)] active:shadow-none active:translate-y-[4px]">
-                        Pagar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL CERRAR MESA -->
-    <div id="close-modal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 fade-in">
-        <div class="bg-stone-900 rounded-2xl border border-stone-800 shadow-2xl p-6 w-full max-w-sm relative">
-            <button onclick="window.app.closeCloseModal()" class="absolute right-4 top-4 text-stone-500 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
-            
-            <div class="flex flex-col items-center text-center mb-6">
-                <div class="bg-amber-500/10 p-4 rounded-full mb-4 border border-amber-500/20">
-                    <i data-lucide="save" class="text-amber-500 w-8 h-8"></i>
-                </div>
-                <h3 class="text-xl font-bold text-white brand-font">Cerrar Mesa</h3>
-                <p class="text-stone-400 text-sm mt-2">¿Archivar partida y liberar la mesa?</p>
-            </div>
-            
-            <div class="bg-stone-950/50 p-3 rounded text-xs text-stone-500 text-center mb-6 border border-stone-800">
-                Esta acción no se puede deshacer.
-            </div>
-
-            <div class="flex gap-3">
-                <button id="btn-cancel-close" onclick="window.app.closeCloseModal()" class="flex-1 bg-stone-800 hover:bg-stone-700 text-white font-bold py-3 rounded-lg transition-colors">
-                    Cancelar
-                </button>
-                <button id="btn-confirm-close" onclick="window.app.confirmCloseTable()" class="flex-1 bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold py-3 rounded-lg transition-colors shadow-[0_4px_0_rgb(180,83,9)] active:shadow-none active:translate-y-[4px]">
-                    Sí, Guardar
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL ELIMINAR MESA -->
-    <div id="delete-modal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 fade-in">
-        <div class="bg-stone-900 rounded-2xl border border-stone-800 shadow-2xl p-6 w-full max-w-sm relative border-t-4 border-t-stone-600">
-            <button onclick="window.app.closeDeleteModal()" class="absolute right-4 top-4 text-stone-500 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
-            
-            <div class="flex flex-col items-center text-center mb-6">
-                <div class="bg-stone-800 p-4 rounded-full mb-4 border border-stone-700">
-                    <i data-lucide="trash-2" class="text-red-500 w-8 h-8"></i>
-                </div>
-                <h3 class="text-xl font-bold text-white brand-font">Desmantelar Mesa</h3>
-                <p class="text-stone-400 text-sm mt-2">¿Eliminar esta mesa permanentemente?</p>
-            </div>
-            
-            <div class="bg-red-500/10 p-3 rounded text-xs text-red-400 text-center mb-6 border border-red-500/20">
-                ¡Advertencia! Esto borrará la mesa sin guardar historial.
-            </div>
-
-            <div class="flex gap-3">
-                <button onclick="window.app.closeDeleteModal()" class="flex-1 bg-stone-800 hover:bg-stone-700 text-white font-bold py-3 rounded-lg transition-colors">
-                    Cancelar
-                </button>
-                <button onclick="window.app.confirmDeleteTable()" class="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-lg transition-colors shadow-[0_4px_0_rgb(153,27,27)] active:shadow-none active:translate-y-[4px]">
-                    Sí, Borrar
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- JAVASCRIPT LOGIC -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot, writeBatch, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, onSnapshot, addDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDWjJl_DxT4YV4IOcw1EpxyRAlqMswcxg4",
-            authDomain: "barbarazo-21337.firebaseapp.com",
-            projectId: "barbarazo-21337",
-            storageBucket: "barbarazo-21337.firebasestorage.app",
-            messagingSenderId: "414416455334",
-            appId: "1:414416455334:web:3c6bb0279e68ec38501667",
-            measurementId: "G-GEXNC2ET1H"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyD3-QJuLrgHfhQOsH8bm1CK5O1MaYvHIzs",
+        authDomain: "lorhels-domino.firebaseapp.com",
+        projectId: "lorhels-domino",
+        storageBucket: "lorhels-domino.firebasestorage.app",
+        messagingSenderId: "857510188450",
+        appId: "1:857510188450:web:ee416510e3add264674efb"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app); 
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const tablesRef = collection(db, 'mesas');
+    const historyRef = collection(db, 'history');
+    const adminsRef = collection(db, 'admins');
+
+    let currentUser = null;
+    let activeAction = null;
+    let unsubHistory, unsubAdmins;
+
+    // --- 2. LÓGICA DE USUARIO ---
+    onAuthStateChanged(auth, (user) => {
+        currentUser = user; // Guardamos el usuario globalmente
+        const statusDiv = document.getElementById('connection-status');
+        const btnAuth = document.getElementById('btn-auth');
         
-        let state = {
-            user: null,
-            isAdmin: false,
-            adminLabel: '', 
-            tables: [],
-            history: [],
-            showHistory: false,
-            tempAction: null,
-            isProcessing: false
-        };
-
-        const App = {
-            
-            showLoginModal: () => {
-                document.getElementById('login-modal').classList.remove('hidden');
-                setTimeout(() => document.getElementById('admin-username').focus(), 100);
-            },
-            
-            closeLoginModal: () => {
-                document.getElementById('login-modal').classList.add('hidden');
-                document.getElementById('login-error').classList.add('hidden');
-                document.getElementById('admin-password').value = '';
-                document.getElementById('admin-username').value = '';
-            },
-
-            loginAdmin: async () => {
-                const username = document.getElementById('admin-username').value.trim().toLowerCase();
-                const pass = document.getElementById('admin-password').value;
-                const btn = document.querySelector('#login-modal button[type="submit"]');
-                const errorMsg = document.getElementById('login-error');
-                
-                btn.disabled = true;
-                btn.innerText = "Verificando...";
-                errorMsg.classList.add('hidden');
-
-                try {
-                    const usersRef = collection(db, 'users');
-                    const q = query(usersRef, where('username', '==', username), where('password', '==', pass));
-                    const querySnapshot = await getDocs(q);
-
-                    if (!querySnapshot.empty) {
-                        const userData = querySnapshot.docs[0].data();
-                        state.isAdmin = true;
-                        state.adminLabel = userData.label || 'Admin'; 
-                        
-                        App.closeLoginModal();
-                        renderUI();
-                    } else {
-                        errorMsg.classList.remove('hidden');
-                    }
-                } catch (e) {
-                    console.error("Error login:", e);
-                    alert("Error de conexión. Verifica si tu usuario tiene permisos.");
-                } finally {
-                    btn.disabled = false;
-                    btn.innerText = "Entrar";
-                }
-            },
-
-            logoutAdmin: () => {
-                state.isAdmin = false;
-                state.adminLabel = '';
-                renderUI();
-            },
-
-            toggleHistory: () => {
-                state.showHistory = !state.showHistory;
-                renderUI();
-            },
-
-            openDebtModal: (tableId, playerIndex) => {
-                const table = state.tables.find(t => t.id === tableId);
-                if (!table) return;
-                const player = table.players[playerIndex];
-
-                state.tempAction = { tableId, playerIndex, type: 'debt' };
-                
-                document.getElementById('debt-player-name').innerText = `Agregando a: ${player.name || 'Jugador ' + (playerIndex + 1)}`;
-                document.getElementById('debt-amount').value = '';
-                
-                document.getElementById('debt-modal').classList.remove('hidden');
-                setTimeout(() => document.getElementById('debt-amount').focus(), 100);
-            },
-
-            closeDebtModal: () => {
-                document.getElementById('debt-modal').classList.add('hidden');
-                state.tempAction = null;
-            },
-
-            confirmDebt: async () => {
-                if (!state.tempAction || state.tempAction.type !== 'debt') return;
-                
-                const amountInput = document.getElementById('debt-amount');
-                const amount = parseInt(amountInput.value);
-                
-                if (isNaN(amount) || amount <= 0) {
-                    alert("Por favor ingrese un monto válido mayor a 0.");
-                    amountInput.focus();
-                    return;
-                }
-
-                const { tableId, playerIndex } = state.tempAction;
-                const table = state.tables.find(t => t.id === tableId);
-                if (table) {
-                    const newPlayers = [...table.players];
-                    newPlayers[playerIndex].debt = (newPlayers[playerIndex].debt || 0) + amount;
-                    // Aumentar contador de partidas perdidas
-                    newPlayers[playerIndex].losses = (newPlayers[playerIndex].losses || 0) + 1;
-                    
-                    App.closeDebtModal();
-                    
-                    try {
-                        await updateDoc(doc(db, 'tables', tableId), { players: newPlayers });
-                    } catch (err) {
-                        console.error("Error updating debt:", err);
-                    }
-                }
-            },
-
-            openPayModal: (tableId, playerIndex) => {
-                const table = state.tables.find(t => t.id === tableId);
-                if (!table) return;
-                const player = table.players[playerIndex];
-                const debt = player.debt || 0;
-
-                if (debt <= 0) return;
-
-                state.tempAction = { tableId, playerIndex, type: 'pay' };
-                
-                document.getElementById('pay-total-debt').innerText = `$${debt}`;
-                document.getElementById('pay-player-name').innerText = `Pagando: ${player.name || 'Jugador'}`;
-                
-                const input = document.getElementById('pay-amount');
-                input.value = debt;
-                
-                document.getElementById('pay-modal').classList.remove('hidden');
-                setTimeout(() => {
-                    input.focus(); 
-                    input.select(); 
-                }, 100);
-            },
-
-            closePayModal: () => {
-                document.getElementById('pay-modal').classList.add('hidden');
-                state.tempAction = null;
-            },
-
-            confirmPay: async () => {
-                if (!state.tempAction || state.tempAction.type !== 'pay') return;
-                
-                const { tableId, playerIndex } = state.tempAction;
-                const table = state.tables.find(t => t.id === tableId);
-                
-                if (!table) return;
-
-                const input = document.getElementById('pay-amount');
-                const paymentAmount = parseInt(input.value);
-                const currentDebt = table.players[playerIndex].debt || 0;
-
-                if (isNaN(paymentAmount) || paymentAmount <= 0) {
-                    alert("Ingrese un monto válido.");
-                    return;
-                }
-
-                if (paymentAmount > currentDebt) {
-                    alert(`El pago ($${paymentAmount}) no puede ser mayor a la deuda ($${currentDebt}).`);
-                    return;
-                }
-
-                const newPlayers = [...table.players];
-                newPlayers[playerIndex].paid = (newPlayers[playerIndex].paid || 0) + paymentAmount;
-                newPlayers[playerIndex].debt = currentDebt - paymentAmount;
-                
-                App.closePayModal();
-                
-                try {
-                    await updateDoc(doc(db, 'tables', tableId), { players: newPlayers });
-                } catch (err) {
-                    console.error("Error updating payment:", err);
-                }
-            },
-
-            openCloseModal: (tableId) => {
-                const table = state.tables.find(t => t.id === tableId);
-                if (!table) return;
-
-                const pendingDebt = table.players.reduce((acc, p) => acc + (p.debt || 0), 0);
-                
-                if (pendingDebt > 0) {
-                    alert(`⛔ ALTO AHÍ ⛔\n\nHay deudas pendientes por $${pendingDebt}.\n\nCobra todo antes de cerrar la mesa.`);
-                    return;
-                }
-
-                state.tempAction = { tableId, type: 'close' };
-                document.getElementById('close-modal').classList.remove('hidden');
-            },
-
-            closeCloseModal: () => {
-                document.getElementById('close-modal').classList.add('hidden');
-                state.tempAction = null;
-            },
-
-            confirmCloseTable: async () => {
-                if (!state.tempAction || state.tempAction.type !== 'close' || state.isProcessing) return;
-                
-                state.isProcessing = true;
-                const btn = document.getElementById('btn-confirm-close');
-                const originalText = btn.innerText;
-                btn.innerText = "Guardando...";
-                btn.classList.add('opacity-50', 'cursor-not-allowed');
-
-                const { tableId } = state.tempAction;
-                const table = state.tables.find(t => t.id === tableId);
-                
-                if (table) {
-                    const totalPaid = table.players.reduce((acc, p) => acc + (p.paid || 0), 0);
-                    
-                    try {
-                        const batch = writeBatch(db);
-
-                        const historyRef = doc(collection(db, 'history'));
-                        batch.set(historyRef, {
-                            ...table,
-                            completedAt: new Date().toLocaleTimeString(),
-                            date: new Date().toLocaleDateString(),
-                            closedAtTimestamp: Date.now(),
-                            totalPaid,
-                            closedBy: state.adminLabel || 'Sistema'
-                        });
-
-                        const tableRef = doc(db, 'tables', tableId);
-                        // Resetear también el contador de pérdidas
-                        batch.update(tableRef, {
-                            status: 'available',
-                            players: Array(4).fill(null).map((_, i) => ({ id: `reset_${i}`, name: "", debt: 0, paid: 0, losses: 0 })),
-                            startTime: null
-                        });
-
-                        await batch.commit();
-                        App.closeCloseModal();
-
-                    } catch (err) {
-                        console.error("Error closing table:", err);
-                        alert("Error al guardar. Verifica tu conexión.");
-                    } finally {
-                        state.isProcessing = false;
-                        btn.innerText = originalText;
-                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                    }
-                } else {
-                    state.isProcessing = false;
-                }
-            },
-
-            openDeleteModal: (tableId) => {
-                state.tempAction = { tableId, type: 'delete' };
-                document.getElementById('delete-modal').classList.remove('hidden');
-            },
-
-            closeDeleteModal: () => {
-                document.getElementById('delete-modal').classList.add('hidden');
-                state.tempAction = null;
-            },
-
-            confirmDeleteTable: async () => {
-                if (!state.tempAction || state.tempAction.type !== 'delete') return;
-                const { tableId } = state.tempAction;
-                
-                App.closeDeleteModal();
-                
-                try {
-                    await deleteDoc(doc(db, 'tables', tableId));
-                } catch (e) { console.error("Error deleting table:", e); }
-            },
-
-            addTable: async () => {
-                if (!state.user) return;
-                const input = document.getElementById('new-table-name');
-                const name = input.value.trim() || `Mesa ${state.tables.length + 1}`;
-                
-                try {
-                    await addDoc(collection(db, 'tables'), {
-                        name: name,
-                        status: 'available',
-                        players: Array(4).fill(null).map((_, i) => ({ id: `new_${i}`, name: "", debt: 0, paid: 0, losses: 0 })),
-                        startTime: null,
-                        createdAt: Date.now()
-                    });
-                    input.value = '';
-                } catch (e) { console.error(e); }
-            },
-
-            updatePlayerName: async (tableId, playerIndex, newName) => {
-                const table = state.tables.find(t => t.id === tableId);
-                if (!table) return;
-
-                const newPlayers = [...table.players];
-                newPlayers[playerIndex].name = newName;
-                
-                let updates = { players: newPlayers };
-                if (newName !== "" && table.status === 'available') {
-                    updates.status = 'playing';
-                    updates.startTime = new Date().toLocaleTimeString();
-                }
-
-                await updateDoc(doc(db, 'tables', tableId), updates);
-            },
-        };
-
-        window.app = App;
-
-        const initAuth = async () => {
-            try {
-                await signInAnonymously(auth);
-            } catch (error) {
-                console.error("Error signing in anonymously:", error);
-            }
-        };
-        initAuth();
-
-        onAuthStateChanged(auth, (user) => {
-            state.user = user;
-            const statusEl = document.getElementById('connection-status');
-            const statusText = document.getElementById('connection-text');
-            
-            if (user) {
-                statusEl.classList.replace('bg-red-600', 'bg-green-500');
-                statusEl.classList.add('shadow-[0_0_10px_rgba(34,197,94,0.5)]');
-                statusText.innerText = "EN LÍNEA";
-                statusText.classList.replace('text-stone-500', 'text-green-500');
-                initDataListeners();
-            } else {
-                statusEl.classList.replace('bg-green-500', 'bg-red-600');
-                statusEl.classList.remove('shadow-[0_0_10px_rgba(34,197,94,0.5)]');
-                statusText.innerText = "DESCONECTADO";
-                statusText.classList.replace('text-green-500', 'text-stone-500');
-            }
+        // Forzamos un re-render de las mesas para que aparezcan/desaparezcan botones
+        // al momento de iniciar o cerrar sesión.
+        getDoc(doc(db, ".info/serverTimeOffset")).then(() => {
+             // Pequeño truco para disparar el renderizado con el estado de usuario actual
+             const grid = document.getElementById('tables-grid');
+             if(grid.innerHTML.includes("card-glass")) {
+                 // Si ya hay mesas, el onSnapshot se encargará, 
+                 // pero podemos llamar a renderTables si tenemos los datos.
+             }
         });
 
-        function initDataListeners() {
-            onSnapshot(collection(db, 'tables'), (snapshot) => {
-                state.tables = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-                    .sort((a, b) => a.createdAt - b.createdAt);
-                renderUI();
-            });
-
-            onSnapshot(collection(db, 'history'), (snapshot) => {
-                state.history = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-                    .sort((a, b) => b.closedAtTimestamp - a.closedAtTimestamp);
-                renderUI();
-            });
+        if (user) {
+            statusDiv.innerHTML = `<span class="w-2 h-2 rounded-full bg-green-500"></span> ONLINE`;
+            btnAuth.innerHTML = `<i data-lucide="log-out" class="w-4 h-4"></i> SALIR`;
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.getElementById('admin-actions').classList.remove('hidden');
+            startAdminListeners();
+        } else {
+            statusDiv.innerHTML = `<span class="w-2 h-2 rounded-full bg-slate-500 animate-pulse"></span> INVITADO`;
+            btnAuth.innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i> ADMIN`;
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('admin-actions').classList.add('hidden');
+            if (unsubHistory) unsubHistory();
+            if (unsubAdmins) unsubAdmins();
         }
+        lucide.createIcons();
+    });
 
-        function renderUI() {
-            const { isAdmin, showHistory, tables, history, adminLabel } = state;
-            
-            document.getElementById('admin-controls').classList.toggle('hidden', !isAdmin);
-            document.getElementById('btn-login').classList.toggle('hidden', isAdmin);
-            
-            if (isAdmin) {
-                document.getElementById('admin-badge').innerText = `HOLA, ${adminLabel}`;
-            }
+    function startAdminListeners() {
+        unsubHistory = onSnapshot(historyRef, (snap) => {
+            const history = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            renderHistory(history);
+        });
+        unsubAdmins = onSnapshot(adminsRef, (snap) => {
+            const admins = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            renderAdminsList(admins);
+        });
+    }
 
-            document.getElementById('action-bar').classList.toggle('hidden', !isAdmin || showHistory);
-            document.getElementById('dashboard-stats').classList.toggle('hidden', !isAdmin);
-            document.getElementById('history-view').classList.toggle('hidden', !showHistory);
-            document.getElementById('tables-grid').classList.toggle('hidden', showHistory);
-            document.getElementById('empty-state').classList.toggle('hidden', showHistory || tables.length > 0);
+    // --- 3. DIBUJAR MESAS (BOTONES PROTEGIDOS) ---
+    function renderTables(tables) {
+    const grid = document.getElementById('tables-grid');
+    if (tables.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center py-20 text-slate-600">No hay mesas activas.</div>`;
+        return;
+    }
 
-            if (isAdmin) renderStats();
-            if (!showHistory) renderTables();
-            if (showHistory) renderHistory();
+    // Determinamos si es Admin para mostrar botones
+    const isVisible = currentUser ? '' : 'hidden';
 
-            lucide.createIcons();
-        }
-
-        function renderStats() {
-            const today = new Date().toLocaleDateString();
-            let totalDebt = 0;
-            let totalCollected = 0;
-            let activeCount = 0;
-            let loser = { name: 'Nadie', amount: 0 };
-
-            state.tables.forEach(t => {
-                if (t.status === 'playing') activeCount++;
-                t.players.forEach(p => {
-                    totalDebt += (p.debt || 0);
-                    totalCollected += (p.paid || 0);
-                    if ((p.debt || 0) > loser.amount) loser = { name: p.name, amount: p.debt };
-                });
-            });
-
-            state.history.forEach(h => {
-                if (h.date === today) totalCollected += (h.totalPaid || 0);
-            });
-
-            const statsHTML = `
-                ${createStatCard('coins', 'Caja Hoy', `$${totalCollected}`, 'amber')}
-                ${createStatCard('alert-triangle', 'En la Calle', `$${totalDebt}`, 'red')}
-                ${createStatCard('users', 'Mesas Activas', activeCount, 'blue')}
-                ${createStatCard('trending-down', 'El Barbarazo', loser.amount > 0 ? `$${loser.amount}` : '-', 'orange', loser.name)}
-            `;
-            document.getElementById('dashboard-stats').innerHTML = statsHTML;
-        }
-
-        function createStatCard(icon, label, value, color, subtext = '') {
-            return `
-            <div class="bg-stone-900 p-5 rounded-xl border border-stone-800 relative overflow-hidden group hover:border-amber-900/50 transition-colors shadow-lg">
-                <div class="absolute -right-4 -top-4 p-3 opacity-5 text-${color}-500 group-hover:opacity-10 transition-opacity">
-                    <i data-lucide="${icon}" width="80" height="80"></i>
-                </div>
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="p-2 rounded-lg bg-${color}-500/10 text-${color}-500 border border-${color}-500/20">
-                        <i data-lucide="${icon}" class="w-5 h-5"></i>
-                    </div>
-                    <span class="text-stone-400 text-sm font-medium uppercase tracking-wider">${label}</span>
-                </div>
-                <div class="text-3xl font-bold text-white mb-1 brand-font tracking-wide">${value}</div>
-                ${subtext ? `<div class="text-xs text-amber-500/70 font-medium">${subtext}</div>` : ''}
-            </div>`;
-        }
-
-        function renderTables() {
-            const container = document.getElementById('tables-grid');
-            container.innerHTML = state.tables.map(table => {
-                const isPlaying = table.status === 'playing';
-                const totalDebt = table.players.reduce((acc, p) => acc + (p.debt || 0), 0);
-                const playerCount = table.players.filter(p => p.name).length;
-
-                return `
-                <div class="rounded-xl transition-all duration-300 ${isPlaying 
-                    ? 'bg-stone-900 border-2 border-amber-600/50 shadow-[0_0_20px_rgba(217,119,6,0.1)]' 
-                    : 'bg-stone-900/60 border border-stone-800 border-dashed'}">
-                    
-                    <div class="p-4 border-b border-stone-800 flex justify-between items-start bg-stone-950/30 rounded-t-xl">
-                        <div>
-                            <h3 class="font-bold text-lg flex items-center gap-2 ${isPlaying ? 'text-white' : 'text-stone-500'} brand-font tracking-wide">
-                                ${table.name}
-                                <span class="text-[10px] px-2 py-0.5 rounded-sm border font-sans font-bold tracking-wider ${isPlaying ? 'bg-amber-500/20 border-amber-500/30 text-amber-500' : 'bg-stone-800 border-stone-700 text-stone-500'}">
-                                    ${isPlaying ? 'OCUPADA' : 'LIBRE'}
-                                </span>
-                            </h3>
-                            <div class="text-xs text-stone-500 mt-1 flex items-center gap-2 font-mono">
-                                <i data-lucide="users" class="w-3 h-3"></i> ${playerCount}/4
-                            </div>
-                        </div>
-                        ${state.isAdmin ? `
-                        <div class="flex gap-1">
-                            ${isPlaying ? `<button onclick="window.app.openCloseModal('${table.id}')" title="Cerrar Mesa" class="p-2 text-stone-400 hover:text-amber-500 hover:bg-amber-500/10 rounded-lg transition-colors"><i data-lucide="save" class="w-5 h-5"></i></button>` : ''}
-                            <button onclick="window.app.openDeleteModal('${table.id}')" title="Desmantelar" class="p-2 text-stone-600 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
-                        </div>
-                        ` : ''}
-                    </div>
-
-                    <div class="p-4 space-y-3">
-                        ${table.players.map((p, idx) => renderPlayerRow(table.id, idx, p, state.isAdmin)).join('')}
-                    </div>
-
-                    ${state.isAdmin ? `
-                    <div class="px-4 py-4 bg-stone-950/50 border-t border-stone-800 rounded-b-xl flex justify-between items-center">
-                        <span class="text-xs text-stone-500 uppercase font-bold tracking-wider">Deuda Mesa</span>
-                        <span class="font-mono font-bold text-lg ${totalDebt > 0 ? 'text-red-500' : 'text-stone-600'}">$${totalDebt}</span>
-                    </div>
-                    ` : ''}
-                </div>
-                `;
-            }).join('');
-        }
-
-        function renderPlayerRow(tableId, idx, p, isAdmin) {
-            const hasName = p.name && p.name !== "";
-            const debt = p.debt || 0;
-            const losses = p.losses || 0;
-            
-            return `
-            <div class="flex items-center justify-between bg-stone-950/40 p-2 rounded-lg border border-stone-800/50 hover:border-stone-700 transition-colors group">
-                <div class="flex items-center gap-3 flex-1 overflow-hidden">
-                    <div class="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 ${hasName ? 'bg-stone-800 text-amber-600 border border-amber-900/30' : 'bg-stone-900 text-stone-700 border border-stone-800'}">
-                        <i data-lucide="user" class="w-4 h-4"></i>
-                    </div>
-                    ${isAdmin ? 
-                        `<input class="bg-transparent text-sm text-stone-200 placeholder-stone-700 focus:outline-none w-full font-medium"
-                           placeholder="Jugador ${idx + 1}" value="${p.name}" 
-                           onchange="window.app.updatePlayerName('${tableId}', ${idx}, this.value)">` 
-                        : 
-                        `<span class="text-sm truncate font-medium ${hasName ? 'text-stone-300' : 'text-stone-700 italic'}">${p.name || "Vacío"}</span>`
-                    }
+    grid.innerHTML = tables.map(table => `
+        <div class="card-glass rounded-2xl overflow-hidden flex flex-col shadow-lg border border-slate-800">
+            <div class="bg-blue-600/10 p-4 border-b border-blue-500/20 flex justify-between items-center">
+                <div>
+                    <h3 class="font-gaming text-xl font-bold text-blue-400 uppercase">${table.name}</h3>
+                    <span class="text-[9px] text-slate-500 uppercase tracking-widest">MESA ACTIVA</span>
                 </div>
                 
-                ${hasName ? `
-                <div class="flex items-center gap-3 pl-2">
-                    <div class="text-right flex-shrink-0">
-                        ${isAdmin 
-                            ? `<div class="text-sm font-mono font-bold ${debt > 0 ? 'text-red-500' : 'text-stone-600'}">$${debt}</div>
-                               <div class="text-[10px] text-stone-600">Pagado: $${p.paid || 0}</div>`
-                            : `<div class="text-sm font-medium ${losses > 0 ? 'text-red-400' : 'text-stone-500'}">Perdidas: ${losses}</div>`
-                        }
-                    </div>
-                    ${isAdmin ? `
-                    <div class="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                        <button onclick="window.app.openDebtModal('${tableId}', ${idx})" title="Añadir deuda" class="p-1.5 text-stone-500 hover:text-red-500 hover:bg-stone-800 rounded transition-colors">
-                            <i data-lucide="trending-up" class="w-4 h-4"></i>
-                        </button>
-                        ${debt > 0 ? `
-                        <button onclick="window.app.openPayModal('${tableId}', ${idx})" title="Pagar" class="p-1.5 text-stone-500 hover:text-amber-500 hover:bg-stone-800 rounded transition-colors">
-                            <i data-lucide="coins" class="w-4 h-4"></i>
-                        </button>` : ''}
-                    </div>
-                    ` : ''}
-                </div>
-                ` : ''}
             </div>
-            `;
-        }
-
-        function renderHistory() {
-            const list = document.getElementById('history-list');
-            const header = document.getElementById('history-header');
             
-            // Render Header according to role
-            header.innerHTML = `
-                <th class="px-6 py-4">Mesa</th>
-                <th class="px-6 py-4">Fecha/Hora</th>
-                <th class="px-6 py-4">Atendido Por</th>
-                <th class="px-6 py-4">Jugadores</th>
-                ${state.isAdmin ? '<th class="px-6 py-4 text-right">Total</th>' : ''}
-            `;
+            <div class="p-4 space-y-3 flex-grow">
+                ${table.players.map((p, idx) => `
+                    <div class="bg-slate-800/40 rounded-xl p-3 border border-slate-700/50">
+                        <div class="flex justify-between items-start mb-2">
+                             <input type="text" 
+    value="${p.name}" 
+    ${currentUser ? '' : 'readonly'} 
+    onblur="updatePlayerName('${table.id}', ${idx}, this.value)"
+    class="w-full mb-2 text-sm font-bold rounded px-2 py-1 transition-all focus:outline-none 
+    ${currentUser 
+        ? 'bg-slate-700/50 border border-blue-500/30 text-white focus:border-blue-500 cursor-text' 
+        : 'bg-transparent border border-transparent text-slate-300 cursor-default'}"
+    placeholder="Nombre Jugador">
+                             <span class="bg-rose-500/10 text-rose-500 text-[9px] px-2 py-0.5 rounded-full border border-rose-500/20">
+                                ${p.lossesCount || 0} PERDIDAS
+                             </span>
+                        </div>
+                        
+                        <div class="flex items-center gap-2 justify-between">
+                            <div class="flex flex-col">
+                                <span class="text-[9px] uppercase text-slate-500">Deuda Pendiente</span>
+                                <span class="font-gaming text-rose-400 font-bold text-lg">$${(p.debt || 0).toFixed(2)}</span>
+                            </div>
+                            
+                            <div class="flex gap-1 ${isVisible}">
+                                <button onclick="prepareAction('${table.id}', ${idx}, 'loss', '${p.name}')" 
+                                    class="bg-rose-500/20 text-rose-400 p-1 px-3 rounded-md text-[10px] font-bold border border-rose-500/30">+ PERDIÓ</button>
+                                <button onclick="prepareAction('${table.id}', ${idx}, 'pay', '${p.name}')" 
+                                    class="bg-emerald-500/20 text-emerald-400 p-1 px-3 rounded-md text-[10px] font-bold border border-emerald-500/30">$ PAGÓ</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
 
-            if (state.history.length === 0) {
-                list.innerHTML = `<tr><td colspan="${state.isAdmin ? 5 : 4}" class="px-6 py-12 text-center text-stone-600 font-medium">No hay registros en el libro aún</td></tr>`;
-                return;
+            <div class="p-4 bg-slate-900/50 border-t border-slate-800 flex items-center justify-between">
+                <div class="flex flex-col">
+                    <span class="text-[10px] uppercase text-slate-500">Acumulado Pagado</span>
+                    <span class="text-xl font-bold font-gaming text-emerald-500">$${(table.totalPaid || 0).toFixed(2)}</span>
+                </div>
+                <button onclick="closeTable('${table.id}')" 
+                    class="${isVisible} bg-blue-600 hover:bg-blue-500 px-5 py-2 rounded-xl font-bold text-xs uppercase shadow-lg">
+                    Cerrar Partida
+                </button>
+            </div>
+        </div>
+    `).join('');
+    
+    // IMPORTANTE: Refrescar iconos de Lucide
+    if(window.lucide) lucide.createIcons();
+}
+
+    // --- 4. FUNCIONES GLOBALES ---
+    window.openModal = (id) => document.getElementById(id).classList.remove('hidden');
+    window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
+
+    function showAlert(msg, type = 'info') {
+        const box = document.getElementById('custom-alert');
+        const message = document.getElementById('alert-message');
+        message.textContent = msg;
+        box.classList.remove('hidden');
+        setTimeout(() => box.classList.add('hidden'), 3000);
+    }
+
+    window.deleteTable = async (id) => {
+        if (!currentUser || !confirm("¿Eliminar mesa?")) return;
+        await deleteDoc(doc(db, 'mesas', id));
+    };
+
+    window.updatePlayerName = async (tableId, index, name) => {
+        if(!currentUser) return;
+        const tRef = doc(db, 'mesas', tableId);
+        const snap = await getDoc(tRef);
+        if (snap.exists()) {
+            const players = [...snap.data().players];
+            if(players[index].name === name) return;
+            players[index].name = name;
+            await updateDoc(tRef, { players });
+        }
+    };
+
+    window.prepareAction = (tableId, playerIndex, type, playerName) => {
+        if(!currentUser) return;
+        activeAction = { tableId, playerIndex, type };
+        document.getElementById('player-action-title').textContent = type === 'loss' ? 'REGISTRAR PÉRDIDA' : 'REGISTRAR PAGO';
+        document.getElementById('player-action-subtitle').textContent = `Jugador: ${playerName}`;
+        document.getElementById('action-amount').value = "";
+        window.openModal('modal-player-action');
+    };
+
+    document.getElementById('btn-confirm-action').onclick = async () => {
+        const amount = parseFloat(document.getElementById('action-amount').value) || 0;
+        if (amount <= 0) return;
+        const tRef = doc(db, 'mesas', activeAction.tableId);
+        const snap = await getDoc(tRef);
+        if (snap.exists()) {
+            const data = snap.data();
+            const players = [...data.players];
+            const p = players[activeAction.playerIndex];
+            if (activeAction.type === 'loss') {
+                p.debt = (p.debt || 0) + amount;
+                p.lossesCount = (p.lossesCount || 0) + 1;
+            } else {
+                p.debt = Math.max(0, (p.debt || 0) - amount);
+                p.totalPaid = (p.totalPaid || 0) + amount;
+                data.totalPaid = (data.totalPaid || 0) + amount;
             }
-            
-            list.innerHTML = state.history.map(h => `
-                <tr class="border-b border-stone-800 hover:bg-stone-800/30 transition-colors">
-                    <td class="px-6 py-4 font-bold text-white brand-font">${h.name}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-xs text-stone-500 font-mono">${h.date}<br>${h.completedAt}</td>
-                    <td class="px-6 py-4">
-                        <span class="px-2 py-1 rounded bg-stone-800 border border-stone-700 text-xs text-amber-500 font-bold uppercase tracking-wider">
-                            ${h.closedBy || 'Sistema'}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 max-w-xs truncate text-stone-400 text-sm">
-                        ${h.players ? h.players.filter(p => p.name).map(p => p.name).join(", ") : "Sin datos"}
-                    </td>
-                    ${state.isAdmin ? `<td class="px-6 py-4 text-right text-amber-500 font-mono font-bold text-lg">$${h.totalPaid || 0}</td>` : ''}
-                </tr>
-            `).join('');
+            await updateDoc(tRef, { players, totalPaid: data.totalPaid || 0 });
+            closeModal('modal-player-action');
         }
+    };
 
-    </script>
+    window.closeTable = async (tableId) => {
+        if(!currentUser) return;
+        const tRef = doc(db, 'mesas', tableId);
+        const snap = await getDoc(tRef);
+        if (snap.exists()) {
+            const data = snap.data();
+            const totalDebt = data.players.reduce((sum, p) => sum + (p.debt || 0), 0);
+            if (totalDebt > 0.1) return showAlert("Hay deudas pendientes", "error");
+            await addDoc(historyRef, {
+                tableName: data.name,
+                admin: currentUser.email,
+                totalPaid: data.totalPaid || 0,
+                closedAt: serverTimestamp(),
+                players: data.players.map(p => ({ name: p.name, paid: p.totalPaid || 0 }))
+            });
+            await deleteDoc(tRef);
+            showAlert("Mesa cerrada.");
+        }
+    };
+
+    document.getElementById('btn-new-table').onclick = () => openModal('modal-table');
+    document.getElementById('btn-save-table').onclick = async () => {
+        if(!currentUser) return;
+        const nameInput = document.getElementById('new-table-name');
+        await addDoc(tablesRef, {
+            name: nameInput.value || "Mesa Nueva",
+            createdBy: currentUser.email,
+            createdAt: serverTimestamp(),
+            totalPaid: 0,
+            players: Array(4).fill(null).map((_, i) => ({ 
+                name: "Jugador " + (i + 1), debt: 0, totalPaid: 0, lossesCount: 0 
+            }))
+        });
+        closeModal('modal-table');
+        nameInput.value = "";
+    };
+
+    function updateStats(tables) {
+        document.getElementById('stat-mesas').textContent = tables.length;
+        const pendiente = tables.reduce((s, t) => s + t.players.reduce((ps, p) => ps + (p.debt || 0), 0), 0);
+        document.getElementById('stat-pendientes').textContent = `$${pendiente.toFixed(2)}`;
+    }
+
+    document.getElementById('btn-auth').onclick = () => {
+        if (currentUser) signOut(auth);
+        else openModal('modal-login');
+    };
+
+    document.getElementById('btn-do-login').onclick = async () => {
+        const email = document.getElementById('login-email').value;
+        const pass = document.getElementById('login-password').value;
+        try {
+            await signInWithEmailAndPassword(auth, email, pass);
+            closeModal('modal-login');
+        } catch (err) { showAlert("Error de acceso", "error"); }
+    };
+
+    document.getElementById('btn-history').onclick = () => openModal('modal-history');
+
+    // ESCUCHA PERMANENTE: Para Admins e Invitados
+onSnapshot(tablesRef, (snap) => {
+    const tables = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderTables(tables); // Esta función ahora se encarga de ver si muestra botones o no
+    updateStats(tables);
+}, (err) => {
+    console.error("Error en tiempo real:", err);
+    if(err.code === 'permission-denied') {
+        console.warn("Asegúrate de que las reglas de Firebase permitan 'read: if true'");
+    }
+});
+</script>
 </body>
 </html>
